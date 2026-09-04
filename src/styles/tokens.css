@@ -1,0 +1,44 @@
+:root {
+  /* 배경 층위 — 네 층만 쓴다 */
+  --night: #241733;
+  --deep: #1b0f28;
+  --panel: #33204a;
+  --panel2: #3d2857;
+  --line: #3a2a52;
+
+  /* 호박 — 유일한 강조색 */
+  --pump: #ef9f27;
+  --pump-hi: #f7ae3c;
+  --pump-d: #ba7517;
+  --pump-in: #2b1a0b;
+  --ink: #412402;
+
+  /* 글자 */
+  --cream: #faeeda;
+  --lav-b: #eeedfe;
+  --lav: #afa9ec;
+  --lav-d: #7f77dd;
+  --dim: #6b5a85;
+
+  /* 의미색 — 사탕 안에 든 것. 다른 용도로 쓰지 않는다 */
+  --letter-bg: #2e4a44;
+  --letter-l: #9fe1cb;
+  --letter-t: #e1f5ee;
+  --curse-bg: #4a3410;
+  --curse-l: #fac775;
+  --curse-t: #faeeda;
+  --plain-bg: #3d2857;
+  --plain-l: #afa9ec;
+  --plain-t: #eeedfe;
+  --danger: #f09595;
+
+  --r-s: 11px;
+  --r-m: 14px;
+  --r-l: 18px;
+  --r-xl: 26px;
+
+  --font-title: 'Jua', 'Gowun Dodum', sans-serif;
+  --font-body: 'Gowun Dodum', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;
+
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}

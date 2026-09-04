@@ -1,0 +1,142 @@
+@import './tokens.css';
+
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; }
+body {
+  margin: 0;
+  background: var(--night);
+  color: var(--lav-b);
+  font-family: var(--font-body);
+  font-size: 14px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+  -webkit-tap-highlight-color: transparent;
+  overflow-x: hidden;
+}
+button, input, textarea { font-family: inherit; }
+a { color: inherit; text-decoration: none; }
+
+/* 화면 뼈대: 카톡 인앱에서 열리므로 모바일 폭이 기준 */
+.screen {
+  min-height: 100%;
+  max-width: 440px;
+  margin: 0 auto;
+  padding: max(20px, env(safe-area-inset-top)) 22px calc(28px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  position: relative;
+}
+.screen-center { justify-content: center; }
+.grow { flex: 1; }
+
+/* 밤하늘 — 화면 위쪽이 살짝 더 어둡다 */
+.sky {
+  position: fixed; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    radial-gradient(60% 40% at 50% 100%, rgba(239, 159, 39, 0.07), transparent 70%),
+    radial-gradient(80% 50% at 50% -10%, #150d1f 0%, transparent 70%),
+    var(--night);
+}
+
+/* 글자 */
+h1, h2, h3 { font-family: var(--font-title); font-weight: 400; margin: 0; color: var(--cream); }
+h1 { font-size: 21px; line-height: 1.4; }
+h2 { font-size: 17px; }
+.num { font-family: var(--font-title); color: var(--pump); font-size: 50px; line-height: 1; }
+.lead { color: var(--lav); margin: 0; }
+.muted { color: var(--lav-d); font-size: 12.5px; margin: 0; }
+.label { font-size: 12px; color: var(--dim); margin: 0 0 8px; }
+.err { color: var(--danger); font-size: 13px; margin: 6px 0 0; min-height: 1.4em; }
+.center { text-align: center; }
+
+/* 버튼 — 화면당 주황 버튼은 하나 */
+.btn {
+  font-family: var(--font-title); font-size: 16px; font-weight: 400;
+  width: 100%; border: 0; cursor: pointer;
+  background: var(--pump); color: var(--ink);
+  border-radius: var(--r-m); padding: 15px;
+  transition: background .15s, transform .12s, opacity .15s;
+}
+.btn:hover { background: var(--pump-hi); }
+.btn:active { transform: scale(.985); }
+.btn:disabled { opacity: .45; cursor: default; transform: none; }
+.btn.ghost { background: transparent; color: var(--lav); border: 1px solid var(--line); font-size: 15px; padding: 13px; }
+.btn.ghost:hover { background: transparent; border-color: var(--lav-d); }
+.btn.link { background: transparent; color: var(--lav-d); font-family: var(--font-body); font-size: 13px; padding: 8px; }
+.btn.link:hover { background: transparent; color: var(--lav); }
+.stack { display: flex; flex-direction: column; gap: 9px; }
+
+/* 입력 */
+.input, .textarea {
+  font-size: 15px; width: 100%; background: var(--deep); color: var(--lav-b);
+  border: 1px solid var(--line); border-radius: 12px; padding: 13px;
+  outline: none; transition: border-color .15s;
+}
+.input:focus, .textarea:focus { border-color: var(--pump); }
+.input::placeholder, .textarea::placeholder { color: #5f4a7a; }
+.textarea { resize: none; line-height: 1.7; min-height: 120px; }
+
+/* 카드·패널 */
+.panel { background: var(--panel); border-radius: var(--r-l); padding: 16px; }
+.well { background: var(--deep); border-radius: 12px; padding: 12px 14px; }
+
+/* 사탕 슬롯 — 세 가지 상태 */
+.slot {
+  aspect-ratio: 1; background: var(--panel); border: 1.5px solid transparent; border-radius: 13px;
+  display: flex; align-items: center; justify-content: center; padding: 6px;
+  cursor: pointer; transition: background .15s, border-color .15s, transform .12s;
+  -webkit-user-select: none; user-select: none;
+}
+.slot:active { transform: scale(.95); }
+.slot.sel { border-color: var(--pump); background: var(--panel2); }
+.slot.done { background: var(--panel2); }
+.slot.static { cursor: default; }
+.slot.static:active { transform: none; }
+.g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 9px; }
+
+/* 팝업 */
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: rgba(11, 5, 18, 0.72);
+  display: flex; align-items: center; justify-content: center; padding: 22px;
+}
+.popup { width: 100%; max-width: 380px; border-radius: var(--r-l); padding: 22px 20px; text-align: center; position: relative; }
+.pop-l { font-size: 12px; margin: 14px 0 8px; letter-spacing: .02em; }
+.pop-b { font-size: 15.5px; margin: 0; line-height: 1.7; white-space: pre-wrap; word-break: keep-all; }
+
+/* 토스트 */
+.toast {
+  position: fixed; left: 50%; bottom: calc(28px + env(safe-area-inset-bottom)); transform: translateX(-50%);
+  background: var(--cream); color: var(--ink); font-family: var(--font-title); font-size: 14px;
+  padding: 10px 18px; border-radius: 20px; z-index: 60; white-space: nowrap;
+  box-shadow: 0 8px 24px rgba(0,0,0,.35);
+}
+
+/* 세그먼트 */
+.seg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; background: var(--deep); padding: 5px; border-radius: 14px; }
+.seg button {
+  border: 0; background: transparent; color: var(--lav); font-family: var(--font-title); font-size: 14px;
+  padding: 10px 4px; border-radius: 10px; cursor: pointer; transition: background .15s, color .15s;
+}
+.seg button.on { background: var(--panel2); color: var(--cream); }
+
+/* 저주 카드 */
+.curse-list { display: flex; flex-direction: column; gap: 7px; max-height: 300px; overflow-y: auto; padding-right: 2px; }
+.curse-card {
+  text-align: left; border: 1.5px solid transparent; background: var(--panel); color: var(--lav-b);
+  border-radius: var(--r-s); padding: 11px 13px; cursor: pointer; font-size: 14px; line-height: 1.5;
+  display: flex; justify-content: space-between; gap: 10px; align-items: center;
+  transition: border-color .15s, background .15s;
+}
+.curse-card.sel { border-color: var(--pump); background: var(--panel2); }
+.curse-card .dur { flex: none; font-size: 11.5px; color: var(--dim); }
+.curse-card.sel .dur { color: var(--curse-l); }
+
+/* 진행 */
+.progress { height: 4px; background: var(--deep); border-radius: 2px; overflow: hidden; }
+.progress > i { display: block; height: 100%; background: var(--pump); border-radius: 2px; transition: width .5s var(--ease-out); }
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}
