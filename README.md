@@ -41,7 +41,7 @@ Cloudflare 대시보드에서 Workers & Pages → Create → Import a repository
 | Deploy command | `npx wrangler deploy` |
 | Root directory | `/` |
 
-Settings → Variables and Secrets 에 `API_ORIGIN` 을 Cloud Run 주소로 넣는다 (예 `https://pumpkin-api-xxxxx.a.run.app`). 비어 있으면 `/api/*` 가 503 을 준다.
+`API_ORIGIN`(Cloud Run 주소)은 `wrangler.jsonc` 의 `vars` 에 있다. 배포마다 이 값이 적용되므로 대시보드가 아니라 파일을 고쳐 푸시한다. 비어 있으면 `/api/*` 가 503 을 준다.
 
 커스텀 도메인 `pumpkin.zzam.today` 는 `wrangler.jsonc` 의 `routes` 에 있어서 배포 때 자동으로 붙는다. `zzam.today` 가 같은 계정에 있어야 한다.
 

@@ -13,10 +13,10 @@
     "run_worker_first": ["/api/*"]
   },
 
-  // Cloud Run 주소. 대시보드 Settings → Variables 에서 덮어쓸 수 있다.
-  // 예: https://pumpkin-api-xxxxx-du.a.run.app
+  // Cloud Run 주소. 비밀이 아니라서 여기 둔다.
+  // (대시보드에서만 바꾸면 다음 배포 때 이 값으로 되돌아온다. 바꿀 땐 여기를 고쳐 푸시.)
   "vars": {
-    "API_ORIGIN": ""
+    "API_ORIGIN": "https://pumpkin-api-352099585813.asia-northeast3.run.app"
   },
 
   "routes": [{ "pattern": "pumpkin.zzam.today", "custom_domain": true }],
