@@ -1,0 +1,25 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "pumpkin-web",
+  "main": "worker/index.ts",
+  "compatibility_date": "2026-09-01",
+
+  // 빌드 결과(dist)를 정적 에셋으로. SPA라서 못 찾는 경로는 index.html 로.
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    // /api/* 만 Worker 가 먼저 받는다. 나머지는 에셋이 바로 응답.
+    "run_worker_first": ["/api/*"]
+  },
+
+  // Cloud Run 주소. 대시보드 Settings → Variables 에서 덮어쓸 수 있다.
+  // 예: https://pumpkin-api-xxxxx-du.a.run.app
+  "vars": {
+    "API_ORIGIN": ""
+  },
+
+  "routes": [{ "pattern": "pumpkin.zzam.today", "custom_domain": true }],
+
+  "observability": { "enabled": true }
+}

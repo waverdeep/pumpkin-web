@@ -28,3 +28,25 @@ pnpm build
 - `src/styles/tokens.css` — 디자인 토큰
 
 모션을 줄이는 설정(prefers-reduced-motion)을 켠 사용자에게는 깜빡임·낙하 연출을 끈다.
+
+## 배포 — Cloudflare Workers (GitHub 연동)
+
+레포에 `wrangler.jsonc` 와 `worker/index.ts` 가 있다. 정적 파일은 에셋으로 서빙하고, `/api/*` 만 Worker 가 받아 Cloud Run 으로 프록시한다. 그래서 CORS 가 없다.
+
+Cloudflare 대시보드에서 Workers & Pages → Create → Import a repository 로 `waverdeep/pumpkin-web` 을 고르고:
+
+| 항목 | 값 |
+|---|---|
+| Build command | `pnpm build` |
+| Deploy command | `npx wrangler deploy` |
+| Root directory | `/` |
+
+Settings → Variables and Secrets 에 `API_ORIGIN` 을 Cloud Run 주소로 넣는다 (예 `https://pumpkin-api-xxxxx.a.run.app`). 비어 있으면 `/api/*` 가 503 을 준다.
+
+커스텀 도메인 `pumpkin.zzam.today` 는 `wrangler.jsonc` 의 `routes` 에 있어서 배포 때 자동으로 붙는다. `zzam.today` 가 같은 계정에 있어야 한다.
+
+로컬에서 확인:
+
+```bash
+pnpm preview:worker   # 빌드 후 wrangler dev. .dev.vars 에 API_ORIGIN=http://127.0.0.1:8000
+```
