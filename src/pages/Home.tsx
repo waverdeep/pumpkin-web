@@ -68,18 +68,7 @@ export default function Home() {
           <Pumpkin shells={[]} placeholder width={210} style={{ margin: '0 auto' }} />
           {/* 이름을 치면 제목이 바로 바뀐다 */}
           <h1 style={{ fontSize: 27, marginTop: 4, minHeight: '1.35em' }}>{typed ? possessive(typed) : '사탕바구니'}</h1>
-          <p className="lead mt8">
-            링크를 뿌리면 사람들이 익명으로 사탕을 넣어.
-            <br />
-            누가 넣었는지, 뭐가 들었는지는 열어봐야 알 수 있어.
-          </p>
-          <div className="steps mt16" aria-label="사용 순서">
-            <span>바구니 만들기</span>
-            <i>→</i>
-            <span>링크 뿌리기</span>
-            <i>→</i>
-            <span>10월 31일에 열기</span>
-          </div>
+          <p className="lead mt8">링크를 뿌리면 사람들이 익명으로 사탕을 넣어</p>
         </motion.div>
       </div>
 
@@ -89,22 +78,20 @@ export default function Home() {
             <button className="btn" onClick={() => startGoogleLogin('/')} disabled={!me?.google_enabled}>
               구글로 시작하기
             </button>
-            <p className="muted center">
-              {loginResult === 'cancel' && '로그인을 취소했어. '}
-              {loginResult === 'state' && '로그인이 중간에 끊겼어. 다시 해봐. '}
-              바구니를 만드는 사람만 로그인해. 사탕을 넣는 사람은 그냥 넣으면 돼.
-              {isInAppBrowser() && ' 카톡 안에서는 로그인 창이 바깥 브라우저로 열려.'}
-            </p>
+            {(loginResult || isInAppBrowser()) && (
+              <p className="muted center">
+                {loginResult === 'cancel' && '로그인을 취소했어. '}
+                {loginResult === 'state' && '로그인이 중간에 끊겼어. 다시 해봐. '}
+                {isInAppBrowser() && '카톡 안에서는 로그인 창이 바깥 브라우저로 열려.'}
+              </p>
+            )}
           </>
         ) : (
           <form onSubmit={submit} className="v8">
-            <label className="label" htmlFor="basket-name" style={{ margin: 0 }}>
-              바구니에 붙일 이름
-            </label>
             <input
-              id="basket-name"
               className="input"
-              placeholder="감자"
+              aria-label="바구니에 붙일 이름"
+              placeholder="바구니에 붙일 이름"
               value={name}
               maxLength={NAME_MAX}
               autoComplete="off"
