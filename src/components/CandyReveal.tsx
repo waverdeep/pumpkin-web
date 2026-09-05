@@ -8,7 +8,10 @@ interface Props {
   candy: CandyOut
   /** 이미 깐 사탕이면 바로 내용을 보여준다 */
   alreadyOpened: boolean
+  /** 아직 안 깐 사탕이 남아 있으면 "다음 사탕 까기"로 이어 간다 */
+  hasNext: boolean
   onRevealed: () => void
+  onNext: () => void
   onClose: () => void
 }
 
@@ -23,8 +26,8 @@ const BURST = Array.from({ length: 10 }, (_, i) => {
   return { x: Math.cos(a) * 64, y: Math.sin(a) * 64, d: i * 0.02 }
 })
 
-/** 사탕 하나 까기. 껍질이 흔들리다 터지고, 안에 든 것이 나온다. */
-export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props) {
+/** 사탕 하나 까기. 하단 시트로 올라오고, 껍질이 흔들리다 터지고, 안에 든 것이 나온다. */
+export function CandyReveal({ candy, alreadyOpened, hasNext, onRevealed, onNext, onClose }: Props) {
   const reduced = useReducedMotion()
   const [stage, setStage] = useState<'wrapped' | 'unwrapping' | 'revealed'>(alreadyOpened ? 'revealed' : 'wrapped')
   const k = KIND[candy.kind]
@@ -44,17 +47,19 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
 
   return (
     <motion.div
-      className="popup"
+      className="sheet"
       role="dialog"
       aria-modal="true"
       onClick={(e) => e.stopPropagation()}
-      initial={{ opacity: 0, scale: 0.92, y: 18 }}
-      animate={{ opacity: 1, scale: 1, y: 0, background: revealed ? k.bg : 'var(--panel)' }}
-      exit={{ opacity: 0, scale: 0.96, y: 10, transition: { duration: 0.15 } }}
-      transition={{ type: 'spring', stiffness: 380, damping: 26, background: { duration: 0.35 } }}
-      style={{ minHeight: 260, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}
+      initial={{ y: '100%' }}
+      animate={{ y: 0, background: revealed ? k.bg : 'var(--panel)' }}
+      exit={{ y: '100%', transition: { duration: 0.2, ease: 'easeIn' } }}
+      transition={{ type: 'spring', stiffness: 320, damping: 30, background: { duration: 0.35 } }}
+      style={{ minHeight: 300, display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
-      <div style={{ position: 'relative', height: 96, width: 96, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <div className="sheet-handle" />
+
+      <div style={{ position: 'relative', height: 116, width: 116, display: 'flex', alignItems: 'center', justifyContent: 'center', marginTop: 4 }}>
         <AnimatePresence>
           {stage !== 'revealed' && (
             <motion.button
@@ -76,7 +81,7 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
               }
               exit={{ opacity: 0, transition: { duration: 0.05 } }}
             >
-              <Candy shell={candy.shell} size={80} />
+              <Candy shell={candy.shell} size={104} />
             </motion.button>
           )}
         </AnimatePresence>
@@ -86,7 +91,7 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
             <motion.span
               key={i}
               aria-hidden="true"
-              style={{ position: 'absolute', width: 7, height: 7, borderRadius: 4, background: i % 2 ? k.l : 'var(--cream)', left: 44, top: 44 }}
+              style={{ position: 'absolute', width: 7, height: 7, borderRadius: 4, background: i % 2 ? k.l : 'var(--cream)', left: 54, top: 54 }}
               initial={{ x: 0, y: 0, opacity: 0, scale: 0.6 }}
               animate={{ x: b.x, y: b.y, opacity: [0, 1, 0], scale: [0.6, 1, 0.4] }}
               transition={{ duration: 0.55, delay: 0.45 + b.d, ease: 'easeOut' }}
@@ -95,20 +100,20 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
 
         {revealed && (
           <motion.div initial={{ scale: 0.4, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 18 }}>
-            <Candy shell={candy.shell} size={64} />
+            <Candy shell={candy.shell} size={68} />
           </motion.div>
         )}
       </div>
 
-      {stage === 'wrapped' && (
-        <motion.p className="lead" style={{ marginTop: 14, fontSize: 13.5 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
+      {stage !== 'revealed' && (
+        <motion.p className="lead" style={{ marginTop: 12, minHeight: 88 }} initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }}>
           사탕을 눌러서 까봐
         </motion.p>
       )}
 
       {revealed && (
         <motion.div
-          initial={{ opacity: 0, y: 12, scale: 0.94 }}
+          initial={{ opacity: 0, y: 12, scale: 0.96 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ type: 'spring', stiffness: 300, damping: 22, delay: 0.08 }}
           style={{ width: '100%' }}
@@ -120,7 +125,7 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
               <>
                 {candy.curse.text}
                 <br />
-                <span style={{ fontSize: 13, color: k.l }}>({candy.curse.duration})</span>
+                <span style={{ fontSize: 14, color: k.l }}>({candy.curse.duration})</span>
               </>
             )}
             {candy.kind === 'plain' && (
@@ -136,9 +141,22 @@ export function CandyReveal({ candy, alreadyOpened, onRevealed, onClose }: Props
               — {candy.sender}
             </p>
           )}
-          <button className="btn link" style={{ marginTop: 16, color: k.l }} onClick={onClose}>
-            닫기
-          </button>
+          <div className="stack" style={{ marginTop: 20 }}>
+            {hasNext ? (
+              <button className="btn" onClick={onNext}>
+                다음 사탕 까기
+              </button>
+            ) : (
+              <button className="btn ghost" style={{ color: k.t, borderColor: k.l }} onClick={onClose}>
+                닫기
+              </button>
+            )}
+            {hasNext && (
+              <button className="btn link" style={{ color: k.l }} onClick={onClose}>
+                닫기
+              </button>
+            )}
+          </div>
         </motion.div>
       )}
     </motion.div>

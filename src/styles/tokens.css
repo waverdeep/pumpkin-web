@@ -5,20 +5,23 @@
   --panel: #33204a;
   --panel2: #3d2857;
   --line: #3a2a52;
+  --line-hi: #4d3a6b;
 
   /* 호박 — 유일한 강조색 */
   --pump: #ef9f27;
   --pump-hi: #f7ae3c;
   --pump-d: #ba7517;
   --pump-in: #2b1a0b;
+  --pump-tint: rgba(239, 159, 39, 0.14);
   --ink: #412402;
 
-  /* 글자 */
+  /* 글자 — 작은 글자도 배경 대비 4.5:1 이상 */
   --cream: #faeeda;
   --lav-b: #eeedfe;
   --lav: #afa9ec;
-  --lav-d: #7f77dd;
-  --dim: #6b5a85;
+  --lav-d: #8a83e0;
+  --dim: #9285b3;
+  --placeholder: #7a6b99;
 
   /* 의미색 — 사탕 안에 든 것. 다른 용도로 쓰지 않는다 */
   --letter-bg: #2e4a44;
@@ -36,6 +39,17 @@
   --r-m: 14px;
   --r-l: 18px;
   --r-xl: 26px;
+
+  /* 간격 스케일 */
+  --s8: 8px;
+  --s12: 12px;
+  --s16: 16px;
+  --s24: 24px;
+  --s32: 32px;
+
+  --gutter: 20px;
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   --font-title: 'Jua', 'Gowun Dodum', sans-serif;
   --font-body: 'Gowun Dodum', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', sans-serif;

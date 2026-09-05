@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { api, ApiError, type CandyOut, type OpenResponse } from '../api/client'
 import { Candy, Unknown } from '../components/Candy'
 import { CandyReveal } from '../components/CandyReveal'
+import { Loading } from '../components/Loading'
 import { Pumpkin } from '../components/Pumpkin'
 import { formatOpenAt, possessive } from '../lib/format'
 import { softSpring, useReducedMotion } from '../lib/motion'
@@ -35,8 +36,7 @@ export default function Open() {
   const [opened, setOpened] = useState<Set<string>>(new Set())
   const [settled, setSettled] = useState(false)
   const [current, setCurrent] = useState<CandyOut | null>(null)
-  const pumpkinRef = useRef<HTMLDivElement>(null)
-  const originRef = useRef<{ x: number; y: number } | null>(null)
+  const miniRef = useRef<HTMLDivElement>(null)
   const gridRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -66,6 +66,14 @@ export default function Open() {
     }
   }, [nav])
 
+  // 시트가 열려 있는 동안 뒤 화면은 스크롤하지 않는다
+  useEffect(() => {
+    document.body.style.overflow = current ? 'hidden' : ''
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [current])
+
   const markOpened = useCallback(
     (id: string) => {
       if (!data) return
@@ -81,23 +89,22 @@ export default function Open() {
 
   function startSpill() {
     if (!data) return
-    const rect = pumpkinRef.current?.getBoundingClientRect()
-    if (rect) originRef.current = { x: rect.left + rect.width / 2, y: rect.top + rect.height * 0.38 }
     localStorage.setItem(introKey(data.slug), '1')
     setPhase('spill')
     window.setTimeout(() => setPhase('grid'), reduced ? 0 : 650)
   }
 
-  // 그리드가 처음 그려질 때, 사탕이 호박 자리에서 날아와 각 칸에 앉는다
+  // 그리드가 처음 그려질 때, 사탕이 위쪽 작은 호박에서 날아와 각 칸에 앉는다
   useLayoutEffect(() => {
     if (phase !== 'grid' || settled || !gridRef.current) return
-    const origin = originRef.current
     const cells = Array.from(gridRef.current.querySelectorAll<HTMLElement>('[data-fly]'))
-    if (!origin || reduced) {
+    const m = miniRef.current?.getBoundingClientRect()
+    if (!m || reduced) {
       cells.forEach((c) => (c.style.opacity = '1'))
       setSettled(true)
       return
     }
+    const origin = { x: m.left + m.width / 2, y: m.top + m.height * 0.4 }
     let last: ReturnType<typeof animate> | undefined
     cells.forEach((el, i) => {
       const r = el.getBoundingClientRect()
@@ -115,111 +122,151 @@ export default function Open() {
 
   if (locked) {
     return (
-      <main className="screen screen-center center">
-        <Pumpkin shells={[]} width={200} style={{ margin: '0 auto' }} />
-        <h1>아직 열 수 없어</h1>
-        <p className="lead">{locked}에 열려</p>
-        <Link to="/me" className="btn ghost" style={{ display: 'block', textAlign: 'center' }}>
-          돌아가기
-        </Link>
+      <main className="screen">
+        <div className="screen-body screen-center center">
+          <Pumpkin shells={[]} width={200} style={{ margin: '0 auto' }} />
+          <div>
+            <h1>아직 열 수 없어</h1>
+            <p className="lead mt4">{locked}에 열려</p>
+          </div>
+        </div>
+        <div className="bar">
+          <Link to="/me" className="btn ghost">
+            돌아가기
+          </Link>
+        </div>
       </main>
     )
   }
   if (error) {
     return (
-      <main className="screen screen-center center">
-        <h1>{error}</h1>
-        <Link to="/me" className="btn ghost" style={{ display: 'block', textAlign: 'center' }}>
-          돌아가기
-        </Link>
+      <main className="screen">
+        <div className="screen-body screen-center center">
+          <h1>{error}</h1>
+        </div>
+        <div className="bar">
+          <Link to="/me" className="btn ghost">
+            돌아가기
+          </Link>
+        </div>
       </main>
     )
   }
-  if (!data) return <main className="screen" />
+  if (!data) return <Loading />
 
   const total = data.candies.length
   const done = data.candies.filter((c) => opened.has(c.id)).length
   const shells = data.candies.map((c) => c.shell)
+  const allDone = done === total
+  const firstUnopened = data.candies.find((c) => !opened.has(c.id))?.id ?? null
+
+  /** 지금 것 다음으로 안 깐 사탕. 끝에 닿으면 앞에서 다시 찾는다 */
+  function nextUnopened(from: CandyOut): CandyOut | null {
+    const i = data!.candies.findIndex((c) => c.id === from.id)
+    const order = [...data!.candies.slice(i + 1), ...data!.candies.slice(0, i)]
+    return order.find((c) => !opened.has(c.id) && c.id !== from.id) ?? null
+  }
 
   if (phase !== 'grid') {
     return (
-      <main className="screen screen-center center">
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={softSpring}>
-          <h1>{possessive(data.name)}</h1>
-          <p className="lead" style={{ marginTop: 4 }}>
-            {total}개의 사탕이 기다리고 있어
-          </p>
-        </motion.div>
-        <motion.div
-          ref={pumpkinRef}
-          animate={phase === 'spill' && !reduced ? { rotate: [0, -3, 3, -4, 4, -2, 0], scale: [1, 1.04, 1.04, 1.06, 1.06, 1.02, 1] } : {}}
-          transition={{ duration: 0.6, ease: 'easeInOut' }}
-          style={{ transformOrigin: '50% 85%' }}
-        >
-          <Pumpkin shells={phase === 'spill' ? [] : shells} lit width="min(100%, 300px)" style={{ margin: '0 auto' }} />
-        </motion.div>
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: phase === 'intro' ? 1 : 0 }} transition={{ delay: 0.3 }}>
+      <main className="screen">
+        <div className="screen-body screen-center center">
+          <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={softSpring}>
+            <h1>{possessive(data.name)}</h1>
+            <p className="lead mt4">{total}개의 사탕이 기다리고 있어</p>
+          </motion.div>
+          <motion.div
+            animate={phase === 'spill' && !reduced ? { rotate: [0, -3, 3, -4, 4, -2, 0], scale: [1, 1.04, 1.04, 1.06, 1.06, 1.02, 1] } : {}}
+            transition={{ duration: 0.6, ease: 'easeInOut' }}
+            style={{ transformOrigin: '50% 85%' }}
+          >
+            <Pumpkin shells={phase === 'spill' ? [] : shells} lit width="min(100%, 290px)" style={{ margin: '0 auto' }} />
+          </motion.div>
+        </div>
+        <motion.div className="bar" initial={{ opacity: 0 }} animate={{ opacity: phase === 'intro' ? 1 : 0 }} transition={{ delay: 0.3 }}>
           <button className="btn" onClick={startSpill} disabled={phase !== 'intro'}>
             열기
           </button>
-          <p className="muted" style={{ marginTop: 12 }}>
-            아무거나 눌러서 하나씩 까면 돼
-          </p>
+          <p className="muted center">아무거나 눌러서 하나씩 까면 돼</p>
         </motion.div>
       </main>
     )
   }
 
+  const counts = data.candies.reduce(
+    (acc, c) => {
+      acc[c.kind] += 1
+      return acc
+    },
+    { letter: 0, curse: 0, plain: 0 },
+  )
+
   return (
     <main className="screen">
-      <header className="center" style={{ paddingTop: 6 }}>
-        <h1>{possessive(data.name)}</h1>
-        <p className="lead" style={{ marginTop: 2 }}>
-          {done === total ? '다 깠어. 언제든 다시 읽을 수 있어' : `${total}개 중 ${done}개 깠어`}
-        </p>
-        <div className="progress" style={{ marginTop: 12 }}>
-          <i style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
-        </div>
-      </header>
+      <div className="screen-body">
+        <header className="center">
+          <div ref={miniRef} style={{ width: 120, margin: '0 auto' }}>
+            <Pumpkin shells={allDone ? [] : shells.slice(0, Math.max(0, total - done))} lit={allDone} width="100%" />
+          </div>
+          <h1 className="mt4">{possessive(data.name)}</h1>
+          <p className="lead mt4">
+            {allDone
+              ? `다 깠어 · 편지 ${counts.letter} · 저주 ${counts.curse} · 그냥 ${counts.plain}`
+              : `${total}개 중 ${done}개 깠어`}
+          </p>
+          <div className="progress mt12">
+            <i style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
+          </div>
+        </header>
 
-      <div className="g4" ref={gridRef}>
-        {data.candies.map((c) => {
-          const isOpen = opened.has(c.id)
-          return (
-            <motion.button
-              key={c.id}
-              data-fly
-              className={`slot ${isOpen ? 'done' : ''}`}
-              style={{ opacity: settled ? 1 : 0 }}
-              onClick={() => settled && setCurrent(c)}
-              aria-label={isOpen ? '깐 사탕 다시 보기' : '안 깐 사탕'}
-              whileTap={{ scale: 0.93 }}
-            >
-              <AnimatePresence mode="wait" initial={false}>
-                {isOpen || !settled ? (
-                  <motion.span key="shell" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
-                    <Candy shell={c.shell} size={38} />
-                  </motion.span>
-                ) : (
-                  <motion.span key="unknown" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.35 }}>
-                    <Unknown size={30} />
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </motion.button>
-          )
-        })}
+        <div className="g3" ref={gridRef}>
+          {data.candies.map((c) => {
+            const isOpen = opened.has(c.id)
+            const pulse = settled && !reduced && c.id === firstUnopened
+            return (
+              <motion.button
+                key={c.id}
+                data-fly
+                className={`slot ${isOpen ? 'done' : ''}`}
+                style={{ opacity: settled ? 1 : 0 }}
+                onClick={() => settled && setCurrent(c)}
+                aria-label={isOpen ? '깐 사탕 다시 보기' : '안 깐 사탕'}
+                whileTap={{ scale: 0.93 }}
+              >
+                <AnimatePresence mode="wait" initial={false}>
+                  {isOpen || !settled ? (
+                    <motion.span key="shell" initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.25 }}>
+                      <Candy shell={c.shell} size={48} />
+                    </motion.span>
+                  ) : (
+                    <motion.span
+                      key="unknown"
+                      initial={{ opacity: 0 }}
+                      animate={pulse ? { opacity: [0.7, 1, 0.7], scale: [1, 1.12, 1] } : { opacity: 1, scale: 1 }}
+                      exit={{ opacity: 0, transition: { duration: 0.2 } }}
+                      transition={pulse ? { duration: 1.8, repeat: Infinity, ease: 'easeInOut' } : { duration: 0.35 }}
+                      style={{ display: 'block' }}
+                    >
+                      <Unknown size={38} />
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+              </motion.button>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="grow" />
-      <Link to="/me" className="btn link" style={{ display: 'block', textAlign: 'center' }}>
-        바구니로 돌아가기
-      </Link>
+      <div className="bar">
+        <Link to="/me" className="btn link">
+          바구니로 돌아가기
+        </Link>
+      </div>
 
       <AnimatePresence>
         {current && (
           <motion.div
-            className="overlay"
+            className="overlay bottom"
             onClick={() => setCurrent(null)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -230,7 +277,13 @@ export default function Open() {
               key={current.id}
               candy={current}
               alreadyOpened={opened.has(current.id)}
+              hasNext={nextUnopened(current) !== null}
               onRevealed={() => markOpened(current.id)}
+              onNext={() => {
+                const n = nextUnopened(current)
+                if (n) setCurrent(n)
+                else setCurrent(null)
+              }}
               onClose={() => setCurrent(null)}
             />
           </motion.div>

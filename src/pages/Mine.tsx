@@ -2,6 +2,7 @@ import { AnimatePresence, motion } from 'motion/react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { api, shareUrl, type BasketPublic } from '../api/client'
+import { Loading } from '../components/Loading'
 import { Pumpkin } from '../components/Pumpkin'
 import { useToast } from '../components/Toast'
 import { daysUntil, formatOpenAt, possessive } from '../lib/format'
@@ -19,6 +20,7 @@ export default function Mine() {
   const [provider, setProvider] = useState<'anon' | 'google' | null>(null)
   const [lit, setLit] = useState(false)
   const [animateFrom, setAnimateFrom] = useState(Infinity)
+  const [showUrl, setShowUrl] = useState(false)
   const litTimer = useRef<number | undefined>(undefined)
   const fresh = Boolean((loc.state as { fresh?: boolean } | null)?.fresh)
 
@@ -55,115 +57,114 @@ export default function Mine() {
     }
   }, [refresh])
 
-  if (!b) return <main className="screen" />
+  if (!b) return <Loading />
 
   const url = shareUrl(b.slug)
   const openText = formatOpenAt(b.open_at)
   const dday = daysUntil(b.open_at, b.server_time)
+  const canOpen = b.is_open && b.count > 0
 
   async function share() {
     const r = await shareLink(url, possessive(b!.name))
     if (r === 'copied') toast('링크를 복사했어')
-    else if (r === 'failed') toast('아래 주소를 길게 눌러 복사해')
+    else if (r === 'failed') {
+      setShowUrl(true)
+      toast('아래 주소를 길게 눌러 복사해')
+    }
+  }
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(url)
+      toast('링크를 복사했어')
+    } catch {
+      setShowUrl(true)
+      toast('아래 주소를 길게 눌러 복사해')
+    }
   }
 
   return (
     <main className="screen">
-      <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="center" style={{ paddingTop: 6 }}>
-        <h1>{possessive(b.name)}</h1>
-      </motion.header>
-
-      <motion.div
-        initial={fresh ? { opacity: 0, scale: 0.85, y: 20 } : false}
-        animate={{ opacity: 1, scale: 1, y: 0 }}
-        transition={softSpring}
-      >
-        <Pumpkin shells={b.shells} lit={lit} animateFrom={animateFrom} placeholder width="min(100%, 300px)" style={{ margin: '0 auto' }} />
-      </motion.div>
-
-      <div className="center" style={{ minHeight: 92 }}>
-        <AnimatePresence mode="wait" initial={false}>
-          {b.count === 0 ? (
-            <motion.div key="empty" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <h2 style={{ fontSize: 21 }}>아직 비어 있어</h2>
-              <p className="lead" style={{ marginTop: 4 }}>
-                링크를 뿌려두면
-                <br />
-                누군가 사탕을 넣고 갈 거야
-              </p>
-            </motion.div>
-          ) : (
-            <motion.div key="count" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
-              <motion.p className="num" key={b.count} initial={{ scale: 1.25 }} animate={{ scale: 1 }} transition={softSpring} style={{ margin: 0 }}>
-                {b.count}
-              </motion.p>
-              <p className="lead" style={{ marginTop: 6 }}>
-                개의 사탕이 담겼어
-                <br />
-                <span className="muted">누가 넣었는지, 뭐가 들었는지는 열어봐야 알 수 있어</span>
-              </p>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
-
-      <div className="stack">
-        <button className="btn" onClick={share}>
-          링크 뿌리기
+      {provider === 'google' && (
+        <button
+          className="btn link small corner"
+          onClick={async () => {
+            await api.logout()
+            nav('/', { replace: true })
+          }}
+        >
+          로그아웃
         </button>
-        <div className="well" style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-          <span style={{ fontSize: 13, color: 'var(--lav)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, userSelect: 'all' }}>
-            {url}
-          </span>
-          <button
-            className="btn link"
-            style={{ width: 'auto', padding: '4px 6px', flex: 'none' }}
-            onClick={async () => {
-              try {
-                await navigator.clipboard.writeText(url)
-                toast('링크를 복사했어')
-              } catch {
-                toast('주소를 길게 눌러 복사해')
-              }
-            }}
-          >
-            복사
-          </button>
+      )}
+
+      <div className="screen-body">
+        <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="center v8" style={{ paddingTop: 4 }}>
+          <h1>{possessive(b.name)}</h1>
+          <div>
+            {b.is_open ? (
+              <span className="pill on">{openText ? `${openText}이 지났어 · 지금 열 수 있어` : '지금 열 수 있어'}</span>
+            ) : (
+              <span className="pill">
+                {openText}에 열려{dday !== null && dday > 0 && ` · D-${dday}`}
+              </span>
+            )}
+          </div>
+        </motion.header>
+
+        <motion.div
+          initial={fresh ? { opacity: 0, scale: 0.85, y: 20 } : false}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          transition={softSpring}
+        >
+          <Pumpkin shells={b.shells} lit={lit} animateFrom={animateFrom} placeholder width="min(100%, 290px)" style={{ margin: '0 auto' }} />
+        </motion.div>
+
+        <div className="center" style={{ minHeight: 76 }}>
+          <AnimatePresence mode="wait" initial={false}>
+            {b.count === 0 ? (
+              <motion.div key="empty" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <h2>아직 비어 있어</h2>
+                <p className="lead mt4">링크를 뿌려두면 누군가 사탕을 넣고 갈 거야</p>
+              </motion.div>
+            ) : (
+              <motion.div key="count" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
+                <h2 style={{ fontSize: 21 }}>
+                  사탕{' '}
+                  <motion.span className="num" key={b.count} initial={{ scale: 1.5, display: 'inline-block' }} animate={{ scale: 1 }} transition={softSpring} style={{ display: 'inline-block', fontSize: 30, lineHeight: 1 }}>
+                    {b.count}
+                  </motion.span>
+                  개가 담겼어
+                </h2>
+                <p className="muted mt4">누가 넣었는지, 뭐가 들었는지는 열어봐야 알 수 있어</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
-      <div className="grow" />
-
-      <div className="center stack">
-        {b.is_open ? (
+      <div className="bar">
+        {showUrl && (
+          <div className="well" style={{ fontSize: 13, color: 'var(--lav)', userSelect: 'all', wordBreak: 'break-all', textAlign: 'center' }}>
+            {url}
+          </div>
+        )}
+        {canOpen ? (
           <>
-            <p className="muted">{openText ? `${openText}이 지나서 열 수 있어` : '지금 열 수 있어'}</p>
-            {b.count > 0 ? (
-              <Link to="/me/open" className="btn ghost" style={{ display: 'block', textAlign: 'center' }}>
-                열어보기
-              </Link>
-            ) : (
-              <button className="btn ghost" disabled>
-                아직 열 게 없어
-              </button>
-            )}
+            <Link to="/me/open" className="btn">
+              열어보기
+            </Link>
+            <button className="btn ghost" onClick={share}>
+              링크 뿌리기
+            </button>
           </>
         ) : (
-          <p className="muted">
-            {openText}에 열려
-            {dday !== null && dday > 0 && <> · D-{dday}</>}
-          </p>
-        )}
-        {provider === 'google' && (
-          <button
-            className="btn link"
-            onClick={async () => {
-              await api.logout()
-              nav('/', { replace: true })
-            }}
-          >
-            로그아웃
-          </button>
+          <>
+            <button className="btn" onClick={share}>
+              링크 뿌리기
+            </button>
+            <button className="btn link" onClick={copy}>
+              링크만 복사하기
+            </button>
+          </>
         )}
       </div>
     </main>
