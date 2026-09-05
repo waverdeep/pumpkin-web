@@ -1,7 +1,8 @@
 import { motion } from 'motion/react'
 import { useEffect, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
-import { api, ApiError } from '../api/client'
+import { useNavigate, useSearchParams } from 'react-router-dom'
+import { api, ApiError, type Me } from '../api/client'
+import { isInAppBrowser, startGoogleLogin } from '../lib/login'
 import { Pumpkin } from '../components/Pumpkin'
 import { softSpring } from '../lib/motion'
 
@@ -9,6 +10,9 @@ const NAME_MAX = 12
 
 export default function Home() {
   const nav = useNavigate()
+  const [params] = useSearchParams()
+  const loginResult = params.get('login')
+  const [me, setMe] = useState<Me | null>(null)
   const [checked, setChecked] = useState(false)
   const [name, setName] = useState('')
   const [err, setErr] = useState('')
@@ -21,7 +25,10 @@ export default function Home() {
       .then((r) => {
         if (!alive) return
         if (r.basket) nav('/me', { replace: true })
-        else setChecked(true)
+        else {
+          setMe(r)
+          setChecked(true)
+        }
       })
       .catch(() => alive && setChecked(true))
     return () => {
@@ -39,6 +46,7 @@ export default function Home() {
       nav('/me', { replace: true, state: { fresh: true } })
     } catch (e) {
       if (e instanceof ApiError && e.status === 409) nav('/me', { replace: true })
+      else if (e instanceof ApiError && e.status === 401) startGoogleLogin('/')
       else setErr((e as Error).message)
     } finally {
       setBusy(false)
@@ -46,6 +54,9 @@ export default function Home() {
   }
 
   if (!checked) return <main className="screen" />
+
+  // 로그인이 필요한데 아직 안 했으면 이름 대신 로그인 버튼
+  const needLogin = Boolean(me?.login_required && !me?.user)
 
   return (
     <main className="screen screen-center">
@@ -59,6 +70,19 @@ export default function Home() {
         </p>
       </motion.div>
 
+      {needLogin ? (
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ ...softSpring, delay: 0.1 }} className="stack">
+          <button className="btn" onClick={() => startGoogleLogin('/')} disabled={!me?.google_enabled}>
+            구글로 시작하기
+          </button>
+          <p className="muted center">
+            {loginResult === 'cancel' && '로그인을 취소했어. '}
+            {loginResult === 'state' && '로그인이 중간에 끊겼어. 다시 해봐. '}
+            바구니를 만드는 사람만 로그인해. 사탕을 넣는 사람은 그냥 넣으면 돼.
+          </p>
+          {isInAppBrowser() && <p className="muted center">카톡 안에서는 로그인 창이 바깥 브라우저로 열려.</p>}
+        </motion.div>
+      ) : (
       <motion.form onSubmit={submit} initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ ...softSpring, delay: 0.1 }}>
         <p className="label">바구니에 붙일 이름</p>
         <input
@@ -77,6 +101,7 @@ export default function Home() {
           바구니 만들기
         </button>
       </motion.form>
+      )}
     </main>
   )
 }

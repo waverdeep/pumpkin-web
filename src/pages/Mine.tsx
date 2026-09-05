@@ -16,6 +16,7 @@ export default function Mine() {
   const loc = useLocation()
   const toast = useToast()
   const [b, setB] = useState<BasketPublic | null>(null)
+  const [provider, setProvider] = useState<'anon' | 'google' | null>(null)
   const [lit, setLit] = useState(false)
   const [animateFrom, setAnimateFrom] = useState(Infinity)
   const litTimer = useRef<number | undefined>(undefined)
@@ -25,6 +26,7 @@ export default function Mine() {
     try {
       const r = await api.me()
       if (!r.basket) return nav('/', { replace: true })
+      setProvider(r.user?.provider ?? null)
       setB((prev) => {
         if (prev && r.basket && r.basket.count > prev.count) {
           setAnimateFrom(prev.count)
@@ -151,6 +153,17 @@ export default function Mine() {
             {openText}에 열려
             {dday !== null && dday > 0 && <> · D-{dday}</>}
           </p>
+        )}
+        {provider === 'google' && (
+          <button
+            className="btn link"
+            onClick={async () => {
+              await api.logout()
+              nav('/', { replace: true })
+            }}
+          >
+            로그아웃
+          </button>
         )}
       </div>
     </main>

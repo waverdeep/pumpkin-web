@@ -67,11 +67,20 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
           : '잠깐 문제가 생겼어. 다시 해봐.'
     throw new ApiError(res.status, message, detail)
   }
+  if (res.status === 204) return undefined as T
   return (await res.json()) as T
 }
 
+export interface Me {
+  user: { provider: 'anon' | 'google' } | null
+  basket: BasketPublic | null
+  login_required: boolean
+  google_enabled: boolean
+}
+
 export const api = {
-  me: () => request<{ basket: BasketPublic | null }>('/api/me'),
+  me: () => request<Me>('/api/me'),
+  logout: () => request<void>('/api/auth/logout', { method: 'POST' }),
   createBasket: (name: string) =>
     request<BasketPublic>('/api/baskets', { method: 'POST', body: JSON.stringify({ name }) }),
   basket: (slug: string) => request<BasketPublic>(`/api/baskets/${slug}`),
