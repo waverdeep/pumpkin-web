@@ -68,7 +68,11 @@ export default function Home() {
           <Pumpkin shells={[]} placeholder width={210} style={{ margin: '0 auto' }} />
           {/* 이름을 치면 제목이 바로 바뀐다 */}
           <h1 style={{ fontSize: 27, marginTop: 4, minHeight: '1.35em' }}>{typed ? possessive(typed) : '사탕바구니'}</h1>
-          <p className="lead mt8">링크를 뿌리면 사람들이 익명으로 사탕을 넣어</p>
+          <p className="lead mt8">
+            친구들에게 사탕을 받아봐!
+            <br />
+            달콤한 편지일까, 짓궂은 저주일까?
+          </p>
         </motion.div>
       </div>
 

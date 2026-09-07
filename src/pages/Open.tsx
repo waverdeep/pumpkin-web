@@ -155,9 +155,8 @@ export default function Open() {
   if (!data) return <Loading />
 
   const total = data.candies.length
-  const done = data.candies.filter((c) => opened.has(c.id)).length
   const shells = data.candies.map((c) => c.shell)
-  const allDone = done === total
+  const allDone = data.candies.every((c) => opened.has(c.id))
   const firstUnopened = data.candies.find((c) => !opened.has(c.id))?.id ?? null
 
   /** 지금 것 다음으로 안 깐 사탕. 끝에 닿으면 앞에서 다시 찾는다 */
@@ -193,30 +192,15 @@ export default function Open() {
     )
   }
 
-  const counts = data.candies.reduce(
-    (acc, c) => {
-      acc[c.kind] += 1
-      return acc
-    },
-    { letter: 0, curse: 0, plain: 0 },
-  )
-
   return (
     <main className="screen">
       <div className="screen-body">
         <header className="center">
           <div ref={miniRef} style={{ width: 120, margin: '0 auto' }}>
-            <Pumpkin shells={allDone ? [] : shells.slice(0, Math.max(0, total - done))} lit={allDone} width="100%" />
+            <Pumpkin shells={data.candies.filter((c) => !opened.has(c.id)).map((c) => c.shell)} lit={allDone} width="100%" />
           </div>
           <h1 className="mt4">{possessive(data.name)}</h1>
-          <p className="lead mt4">
-            {allDone
-              ? `다 깠어 · 편지 ${counts.letter} · 저주 ${counts.curse} · 그냥 ${counts.plain}`
-              : `${total}개 중 ${done}개 깠어`}
-          </p>
-          <div className="progress mt12">
-            <i style={{ width: `${total ? (done / total) * 100 : 0}%` }} />
-          </div>
+          <p className="lead mt4">{allDone ? '언제든 다시 읽을 수 있어' : '아무거나 눌러서 까봐'}</p>
         </header>
 
         <div className="g3" ref={gridRef}>

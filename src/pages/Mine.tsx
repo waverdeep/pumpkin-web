@@ -99,15 +99,13 @@ export default function Mine() {
       <div className="screen-body">
         <motion.header initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="center v8" style={{ paddingTop: 4 }}>
           <h1>{possessive(b.name)}</h1>
-          <div>
-            {b.is_open ? (
-              <span className="pill on">{openText ? `${openText}이 지났어 · 지금 열 수 있어` : '지금 열 수 있어'}</span>
-            ) : (
+          {!b.is_open && (
+            <div>
               <span className="pill">
                 {openText}에 열려{dday !== null && dday > 0 && ` · D-${dday}`}
               </span>
-            )}
-          </div>
+            </div>
+          )}
         </motion.header>
 
         <motion.div
@@ -123,7 +121,7 @@ export default function Mine() {
             {b.count === 0 ? (
               <motion.div key="empty" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <h2>아직 비어 있어</h2>
-                <p className="lead mt4">링크를 뿌려두면 누군가 사탕을 넣고 갈 거야</p>
+                <p className="lead mt4">친구들을 부르면 사탕이 하나둘 쌓일 거야</p>
               </motion.div>
             ) : (
               <motion.div key="count" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -134,7 +132,7 @@ export default function Mine() {
                   </motion.span>
                   개가 담겼어
                 </h2>
-                <p className="muted mt4">누가 넣었는지, 뭐가 들었는지는 열어봐야 알 수 있어</p>
+                <p className="muted mt4">{b.is_open ? '편지일까, 저주일까? 이제 열어봐도 돼' : `편지일까, 저주일까? ${openText ?? '개봉일'}에 열어보자`}</p>
               </motion.div>
             )}
           </AnimatePresence>
@@ -153,13 +151,13 @@ export default function Mine() {
               열어보기
             </Link>
             <button className="btn ghost" onClick={share}>
-              링크 뿌리기
+              친구들 더 부르기
             </button>
           </>
         ) : (
           <>
             <button className="btn" onClick={share}>
-              링크 뿌리기
+              친구들 부르기
             </button>
             <button className="btn link" onClick={copy}>
               링크만 복사하기
