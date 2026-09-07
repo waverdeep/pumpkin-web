@@ -64,7 +64,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
         ? detail
         : detail && typeof detail === 'object' && 'message' in detail
           ? String((detail as { message: string }).message)
-          : '잠깐 문제가 생겼어. 다시 해봐.'
+          : '잠깐 문제가 생겼어. 다시 해봐'
     throw new ApiError(res.status, message, detail)
   }
   if (res.status === 204) return undefined as T

@@ -86,7 +86,7 @@ export default function Home() {
               <p className="muted center">
                 {loginResult === 'cancel' && '로그인을 취소했어. '}
                 {loginResult === 'state' && '로그인이 중간에 끊겼어. 다시 해봐. '}
-                {isInAppBrowser() && '카톡 안에서는 로그인 창이 바깥 브라우저로 열려.'}
+                {isInAppBrowser() && '카톡 안에서는 로그인 창이 바깥 브라우저로 열려'}
               </p>
             )}
           </>

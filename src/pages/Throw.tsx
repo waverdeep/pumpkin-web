@@ -6,7 +6,7 @@ import { SHELL_COUNT } from '../assets/CandyDefs'
 import { Candy } from '../components/Candy'
 import { Loading } from '../components/Loading'
 import { Pumpkin } from '../components/Pumpkin'
-import { formatOpenAt, possessive } from '../lib/format'
+import { formatOpenAt, shortName } from '../lib/format'
 import { softSpring } from '../lib/motion'
 import NotFound from './NotFound'
 
@@ -148,7 +148,7 @@ export default function Throw() {
               </motion.div>
             ) : (
               <motion.div key="head" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }}>
-                <h1>{possessive(b.name)}</h1>
+                <h1>{shortName(b.name)}</h1>
                 <p className="lead mt4">달콤한 마니또가 되어줘</p>
                 <p className="muted mt4">
                   {b.count === 0 ? '아직 비어 있어. 첫 사탕을 넣어봐' : `사탕 ${b.count}개가 담겨 있어`}
@@ -275,12 +275,12 @@ export default function Throw() {
               {senderOpen || sender ? (
                 <motion.div initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.18 }}>
                   <label className="label" htmlFor="sender">
-                    보낸 사람 <span style={{ color: 'var(--dim)' }}>· 안 적어도 돼</span>
+                    마니또 이름 <span style={{ color: 'var(--dim)' }}>· 안 적어도 돼</span>
                   </label>
                   <input
                     id="sender"
                     className="input"
-                    placeholder="익명"
+                    placeholder="익명의 마니또"
                     value={sender}
                     maxLength={SENDER_MAX}
                     autoComplete="off"

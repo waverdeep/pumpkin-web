@@ -16,9 +16,9 @@ interface Props {
 }
 
 const KIND = {
-  letter: { label: '익명의 편지', named: '편지', bg: 'var(--letter-bg)', l: 'var(--letter-l)', t: 'var(--letter-t)' },
-  curse: { label: '저주', named: '저주', bg: 'var(--curse-bg)', l: 'var(--curse-l)', t: 'var(--curse-t)' },
-  plain: { label: '말 없는 사탕', named: '사탕', bg: 'var(--plain-bg)', l: 'var(--plain-l)', t: 'var(--plain-t)' },
+  letter: { label: '마니또의 편지', named: '편지', bg: 'var(--letter-bg)', l: 'var(--letter-l)', t: 'var(--letter-t)' },
+  curse: { label: '마니또의 저주', named: '저주', bg: 'var(--curse-bg)', l: 'var(--curse-l)', t: 'var(--curse-t)' },
+  plain: { label: '말 없는 마니또', named: '사탕', bg: 'var(--plain-bg)', l: 'var(--plain-l)', t: 'var(--plain-t)' },
 } as const
 
 const BURST = Array.from({ length: 10 }, (_, i) => {
@@ -132,7 +132,7 @@ export function CandyReveal({ candy, alreadyOpened, hasNext, onRevealed, onNext,
               <>
                 아무 말 없이
                 <br />
-                사탕만 두고 갔어.
+                사탕만 두고 갔어
               </>
             )}
           </p>
