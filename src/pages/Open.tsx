@@ -186,7 +186,7 @@ export default function Open() {
           <button className="btn" onClick={startSpill} disabled={phase !== 'intro'}>
             열기
           </button>
-          <p className="muted center">아무거나 눌러서 하나씩 까면 돼</p>
+          <p className="muted center">사탕은 하나씩 까야 제맛이야</p>
         </motion.div>
       </main>
     )
@@ -200,7 +200,7 @@ export default function Open() {
             <Pumpkin shells={data.candies.filter((c) => !opened.has(c.id)).map((c) => c.shell)} lit={allDone} width="100%" />
           </div>
           <h1 className="mt4">{possessive(data.name)}</h1>
-          <p className="lead mt4">{allDone ? '언제든 다시 읽을 수 있어' : '아무거나 눌러서 까봐'}</p>
+          <p className="lead mt4">{allDone ? '사탕은 다 깠어. 언제든 다시 꺼내 볼 수 있어' : '어떤 사탕부터 까볼까?'}</p>
         </header>
 
         <div className="g3" ref={gridRef}>

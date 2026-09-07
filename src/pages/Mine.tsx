@@ -121,7 +121,7 @@ export default function Mine() {
             {b.count === 0 ? (
               <motion.div key="empty" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <h2>아직 비어 있어</h2>
-                <p className="lead mt4">친구들을 부르면 사탕이 하나둘 쌓일 거야</p>
+                <p className="lead mt4">사탕 받으러 다니면 하나둘 쌓일 거야</p>
               </motion.div>
             ) : (
               <motion.div key="count" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -151,13 +151,13 @@ export default function Mine() {
               열어보기
             </Link>
             <button className="btn ghost" onClick={share}>
-              친구들 더 부르기
+              사탕 더 받으러 가기
             </button>
           </>
         ) : (
           <>
             <button className="btn" onClick={share}>
-              친구들 부르기
+              사탕 받으러 가기
             </button>
             <button className="btn link" onClick={copy}>
               링크만 복사하기
