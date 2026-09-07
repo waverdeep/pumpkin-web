@@ -22,6 +22,7 @@ export default function Mine() {
   const [animateFrom, setAnimateFrom] = useState(Infinity)
   const [showUrl, setShowUrl] = useState(false)
   const litTimer = useRef<number | undefined>(undefined)
+  const countRef = useRef<number | null>(null)
   const fresh = Boolean((loc.state as { fresh?: boolean } | null)?.fresh)
 
   const refresh = useCallback(async () => {
@@ -29,19 +30,21 @@ export default function Mine() {
       const r = await api.me()
       if (!r.basket) return nav('/', { replace: true })
       setProvider(r.user?.provider ?? null)
-      setB((prev) => {
-        if (prev && r.basket && r.basket.count > prev.count) {
-          setAnimateFrom(prev.count)
-          setLit(true)
-          window.clearTimeout(litTimer.current)
-          litTimer.current = window.setTimeout(() => setLit(false), 2800 + (r.basket.count - prev.count) * 120)
-        }
-        return r.basket
-      })
+      // 상태 갱신 함수 안에서 다른 컴포넌트(토스트)를 건드리지 않도록 이전 개수는 ref 로 비교한다
+      const prevCount = countRef.current
+      if (prevCount !== null && r.basket.count > prevCount) {
+        setAnimateFrom(prevCount)
+        setLit(true)
+        toast('마니또가 다녀갔어')
+        window.clearTimeout(litTimer.current)
+        litTimer.current = window.setTimeout(() => setLit(false), 2800 + (r.basket.count - prevCount) * 120)
+      }
+      countRef.current = r.basket.count
+      setB(r.basket)
     } catch {
       /* 잠깐 끊긴 것. 다음 폴링에서 다시 */
     }
-  }, [nav])
+  }, [nav, toast])
 
   useEffect(() => {
     refresh()
@@ -121,7 +124,7 @@ export default function Mine() {
             {b.count === 0 ? (
               <motion.div key="empty" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
                 <h2>아직 비어 있어</h2>
-                <p className="lead mt4">사탕 받으러 다니면 하나둘 쌓일 거야</p>
+                <p className="lead mt4">마니또를 찾으면 사탕이 하나둘 쌓일 거야</p>
               </motion.div>
             ) : (
               <motion.div key="count" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}>
@@ -151,13 +154,13 @@ export default function Mine() {
               열어보기
             </Link>
             <button className="btn ghost" onClick={share}>
-              사탕 더 받으러 가기
+              마니또 더 찾으러 가기
             </button>
           </>
         ) : (
           <>
             <button className="btn" onClick={share}>
-              사탕 받으러 가기
+              마니또 찾으러 가기
             </button>
             <button className="btn link" onClick={copy}>
               링크만 복사하기

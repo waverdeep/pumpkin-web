@@ -67,7 +67,7 @@ export default function Home() {
         <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={softSpring} className="center">
           <Pumpkin shells={[]} placeholder width={210} style={{ margin: '0 auto' }} />
           {/* 이름을 치면 제목이 바로 바뀐다 */}
-          <h1 style={{ fontSize: 27, marginTop: 4, minHeight: '1.35em' }}>{typed ? possessive(typed) : '사탕바구니'}</h1>
+          <h1 style={{ fontSize: 27, marginTop: 4 }}>달콤한 마니또</h1>
           <p className="lead mt8">
             친구들에게 사탕을 받아봐!
             <br />
@@ -107,6 +107,7 @@ export default function Home() {
               }}
             />
             <p className="err">{err}</p>
+            {typed && !err && <p className="muted center">{possessive(typed)}</p>}
             <button className="btn" type="submit" disabled={busy}>
               바구니 만들기
             </button>

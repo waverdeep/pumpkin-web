@@ -143,15 +143,16 @@ export default function Throw() {
           <AnimatePresence mode="wait" initial={false}>
             {done ? (
               <motion.div key="done" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }} transition={{ ...softSpring, delay: 0.5 }}>
-                <h1>{b.name}의 바구니에 담겼어</h1>
+                <h1>{b.name}의 마니또로 다녀갔어</h1>
                 <p className="lead mt4">{openText ? `${openText}에 열려. 그때까진 아무도 몰라` : '열어보기 전까진 아무도 몰라'}</p>
               </motion.div>
             ) : (
               <motion.div key="head" initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, transition: { duration: 0.12 } }}>
                 <h1>{possessive(b.name)}</h1>
-                <p className="lead mt4">
+                <p className="lead mt4">달콤한 마니또가 되어줘</p>
+                <p className="muted mt4">
                   {b.count === 0 ? '아직 비어 있어. 첫 사탕을 넣어봐' : `사탕 ${b.count}개가 담겨 있어`}
-                  {openText && <span className="muted"> · {openText}에 열려</span>}
+                  {openText && ` · ${openText}에 열려`}
                 </p>
                 {b.is_owner && (
                   <p className="muted mt4">
@@ -302,7 +303,7 @@ export default function Throw() {
         {done ? (
           <motion.div className="stack" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.9 }}>
             <Link to="/" className="btn">
-              나도 바구니 만들기
+              나도 사탕 받아보기
             </Link>
             <button className="btn ghost" onClick={reset}>
               하나 더 넣기

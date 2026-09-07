@@ -13,7 +13,7 @@ export default function NotFound({ message = '그런 바구니는 없어' }: { m
       </div>
       <div className="bar">
         <Link to="/" className="btn ghost">
-          내 바구니 만들기
+          나도 사탕 받아보기
         </Link>
       </div>
     </main>

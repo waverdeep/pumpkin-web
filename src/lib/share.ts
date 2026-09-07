@@ -2,7 +2,7 @@
 export async function shareLink(url: string, title: string): Promise<'shared' | 'copied' | 'failed'> {
   if (typeof navigator.share === 'function') {
     try {
-      await navigator.share({ title, text: `${title} — 익명으로 사탕 하나 넣고 가`, url })
+      await navigator.share({ title, text: `${title} — 달콤한 마니또가 되어줘. 몰래 사탕 하나 넣고 가`, url })
       return 'shared'
     } catch (e) {
       if ((e as DOMException).name === 'AbortError') return 'failed'

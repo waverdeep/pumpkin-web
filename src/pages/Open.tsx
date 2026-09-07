@@ -172,7 +172,7 @@ export default function Open() {
         <div className="screen-body screen-center center">
           <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={softSpring}>
             <h1>{possessive(data.name)}</h1>
-            <p className="lead mt4">{total}개의 사탕이 기다리고 있어</p>
+            <p className="lead mt4">마니또들이 두고 간 사탕 {total}개</p>
           </motion.div>
           <motion.div
             animate={phase === 'spill' && !reduced ? { rotate: [0, -3, 3, -4, 4, -2, 0], scale: [1, 1.04, 1.04, 1.06, 1.06, 1.02, 1] } : {}}
