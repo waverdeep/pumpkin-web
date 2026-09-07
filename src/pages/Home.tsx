@@ -96,6 +96,7 @@ export default function Home() {
               maxLength={NAME_MAX}
               autoComplete="off"
               enterKeyHint="done"
+              autoFocus={window.matchMedia('(hover: hover) and (pointer: fine)').matches}
               onChange={(e) => {
                 setName(e.target.value)
                 if (err) setErr('')
